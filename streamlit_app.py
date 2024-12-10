@@ -9,6 +9,8 @@ import seaborn as sns
 import streamlit_authenticator as stauth
 import yfinance as yf
 import warnings
+import matplotlib
+matplotlib.use('Agg')  # Use a non-interactive backend
 
 # Suppress specific warnings
 warnings.filterwarnings("ignore", message="missing ScriptRunContext! This warning can be ignored when running in bare mode.")
@@ -599,8 +601,11 @@ with col1:
 
 with col2:
     st.subheader("Put Price Heatmap")
-    _, heatmap_fig_put = plot_heatmap(bs_model, spot_range, vol_range, strike)
-    st.pyplot(heatmap_fig_put)
+    heatmap_fig_put, _ = plot_heatmap(bs_model, spot_range, vol_range, strike)
+    if heatmap_fig_put is not None:
+        st.pyplot(heatmap_fig_put)
+    else:
+        st.error("The heatmap figure could not be created.")
 st.title("Barndorff-Nielsen and Shephard (BNS) Model")
 
 # Table of Inputs for BNS Model
