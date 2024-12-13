@@ -119,24 +119,28 @@ class BlackScholes:
     def plot_3d_surface(self, spot_range, time_range):
         Z = self.calculate_price_surface(spot_range, time_range)
         
-        # Create the figure and axes
-        fig = plt.figure(figsize=(10, 7))
-        ax = fig.add_subplot(111, projection='3d')
-        X, Y = np.meshgrid(spot_range, time_range)
+        # Create the figure using Plotly
+        fig = go.Figure(data=[go.Surface(z=Z, x=spot_range, y=time_range, colorscale='Viridis', 
+                                          showscale=True)])
 
-        # Custom hillshading
-        ls = LightSource(azdeg=270, altdeg=45)
-        rgb = ls.shade(Z, cmap=cm.gist_earth, vert_exag=0.1, blend_mode='soft')
-        surface = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, facecolors=rgb,
-                                   linewidth=0, antialiased=False, shade=False)
+        # Update layout to match the original format
+        fig.update_layout(
+            scene=dict(
+                xaxis_title='Spot Price',
+                yaxis_title='Time to Expiry (Years)',
+                zaxis_title='Call Option Price',
+                camera=dict(eye=dict(x=1.5, y=1.5, z=1.5)),  # Adjust camera angle if needed
+                aspectmode='manual',
+                aspectratio=dict(x=1, y=1, z=0.5)  # Adjust aspect ratio to match original
+            ),
+            title='Black-Scholes Call Option Price Surface',
+            autosize=True,
+            width=800,  # Set width to match your original plot
+            height=600  # Set height to match your original plot
+        )
 
-        ax.set_xlabel('Spot Price')
-        ax.set_ylabel('Time to Expiry (Years)')
-        ax.set_zlabel('Call Option Price')
-        ax.set_title('Black-Scholes Call Option Price Surface with Hillshading')
-
-        # Display the 3D plot in Streamlit
-        st.pyplot(fig)
+        # Display the interactive 3D plot in Streamlit
+        st.plotly_chart(fig)
 
     def plot_heatmaps(self, volatility_range, strike_range):
         call_prices = np.zeros((len(volatility_range), len(strike_range)))
