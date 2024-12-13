@@ -121,7 +121,7 @@ class BlackScholes:
         
         # Create the figure using Plotly
         fig = go.Figure(data=[go.Surface(z=Z, x=spot_range, y=time_range, colorscale='Viridis', 
-                                          showscale=True)])
+                                          showscale=True, hoverinfo='x+y+z')])
 
         # Update layout to match the original format
         fig.update_layout(
@@ -140,7 +140,7 @@ class BlackScholes:
         )
 
         # Display the interactive 3D plot in Streamlit
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, use_container_width=True)
 
     def plot_heatmaps(self, volatility_range, strike_range):
         call_prices = np.zeros((len(volatility_range), len(strike_range)))
