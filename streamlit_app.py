@@ -10,6 +10,7 @@ import streamlit_authenticator as stauth
 import yfinance as yf
 import warnings
 import matplotlib
+
 matplotlib.use('Agg')  # Use a non-interactive backend
 
 # Suppress specific warnings
@@ -114,6 +115,7 @@ class BlackScholes:
         
         return Z
 
+
     def plot_3d_surface(self, spot_range, time_range):
         Z = self.calculate_price_surface(spot_range, time_range)
         
@@ -121,12 +123,17 @@ class BlackScholes:
         fig = plt.figure(figsize=(10, 7))
         ax = fig.add_subplot(111, projection='3d')
         X, Y = np.meshgrid(spot_range, time_range)
-        surface = ax.plot_surface(X, Y, Z, cmap='viridis')
-        
+
+        # Custom hillshading
+        ls = LightSource(azdeg=270, altdeg=45)
+        rgb = ls.shade(Z, cmap=cm.gist_earth, vert_exag=0.1, blend_mode='soft')
+        surface = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, facecolors=rgb,
+                                   linewidth=0, antialiased=False, shade=False)
+
         ax.set_xlabel('Spot Price')
         ax.set_ylabel('Time to Expiry (Years)')
         ax.set_zlabel('Call Option Price')
-        ax.set_title('Black-Scholes Call Option Price Surface')
+        ax.set_title('Black-Scholes Call Option Price Surface with Hillshading')
 
         # Display the 3D plot in Streamlit
         st.pyplot(fig)
