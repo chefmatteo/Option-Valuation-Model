@@ -1,4 +1,4 @@
-siimport streamlit as st
+import streamlit as st
 import pandas as pd
 import numpy as np
 from scipy.stats import norm
@@ -431,6 +431,8 @@ class BNSModel:
 with st.sidebar:
     st.title("📊 Options Pricing Model")
     st.write("`Created by:`")
+    linkedin_url = "www.linkedin.com/in/matthew-ng-315a07281"
+    st.markdown(f'<a href="{linkedin_url}" target="_blank" style="text-decoration: none; color: inherit;"><img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="25" height="25" style="vertical-align: middle; margin-right: 10px;">`Matthew Ng`</a>', unsafe_allow_html=True)
 
     st.markdown("### Stock Information")
     stock_symbol = st.text_input("Enter stock symbol (e.g, APPL, TSLA):", "AAPL")
@@ -516,10 +518,16 @@ def plot_heatmap(bs_model, spot_range, vol_range, strike):
 # Main Page for Output Display
 st.title("Black-Scholes Pricing Model")
 
-# Table of Inputs
+# Define separate strike price variables for each model
+black_scholes_strike = strike  # Strike price for Black-Scholes model
+monte_carlo_strike = strike  # Strike price for Monte Carlo model
+binomial_strike = strike  # Strike price for Binomial model
+bns_model_strike = strike  # Strike price for BNS model
+
+# Update the input data for the Black-Scholes model
 input_data = {
     "Current Asset Price": [current_price],
-    "Strike Price": [strike], 
+    "Strike Price (Black-Scholes Model)": [black_scholes_strike], 
     "Time to Maturity (Years)": [time_to_maturity],
     "Volatility (σ)": [volatility],
     "Risk-Free Interest Rate": [interest_rate],
@@ -528,31 +536,29 @@ input_data = {
 input_df = pd.DataFrame(input_data)
 st.table(input_df)
 
-# Calculate Call and Put values
-bs_model = BlackScholes(time_to_maturity, strike, current_price, volatility, interest_rate)
-call_price, put_price = bs_model.calculate_prices()
+# Calculate Call and Put values for Black-Scholes model
+bs_model = BlackScholes(time_to_maturity, black_scholes_strike, current_price, volatility, interest_rate)
+call_price_bs, put_price_bs = bs_model.calculate_prices()
 
-# Display Call and Put Values in colored tables
-col1, col2 = st.columns([1,1], gap="small")
+# Display Call and Put Values in colored tables for Black-Scholes
+col1, col2 = st.columns([1, 1], gap="small")
 
 with col1:
-    # Using the custom class for CALL value
     st.markdown(f"""
         <div class="metric-container metric-call">
             <div>
-                <div class="metric-label">CALL Value</div>
-                <div class="metric-value">${call_price:.2f}</div>
+                <div class="metric-label">CALL Value (Black-Scholes)</div>
+                <div class="metric-value">${call_price_bs:.2f}</div>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
 with col2:
-    # Using the custom class for PUT value
     st.markdown(f"""
         <div class="metric-container metric-put">
             <div>
-                <div class="metric-label">PUT Value</div>
-                <div class="metric-value">${put_price:.2f}</div>
+                <div class="metric-label">PUT Value (Black-Scholes)</div>
+                <div class="metric-value">${put_price_bs:.2f}</div>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -574,7 +580,7 @@ for i in range(len(time_range_3d)):
     for j in range(len(spot_range_3d)):
         temp_bs = BlackScholes(
             time_to_maturity=time_range_3d[i],
-            strike=strike,
+            strike=black_scholes_strike,
             current_price=spot_range_3d[j],
             volatility=volatility,
             interest_rate=interest_rate
@@ -612,12 +618,12 @@ col1, col2 = st.columns([1,1], gap="small")
 
 with col1:
     st.subheader("Call Price Heatmap")
-    heatmap_fig_call, _ = plot_heatmap(bs_model, spot_range, vol_range, strike)
+    heatmap_fig_call, _ = plot_heatmap(bs_model, spot_range, vol_range, black_scholes_strike)
     st.pyplot(heatmap_fig_call)
 
 with col2:
     st.subheader("Put Price Heatmap")
-    heatmap_fig_put, _ = plot_heatmap(bs_model, spot_range, vol_range, strike)
+    heatmap_fig_put, _ = plot_heatmap(bs_model, spot_range, vol_range, black_scholes_strike)
     if heatmap_fig_put is not None:
         st.pyplot(heatmap_fig_put)
     else:
@@ -627,7 +633,7 @@ st.title("Barndorff-Nielsen and Shephard (BNS) Model")
 # Table of Inputs for BNS Model
 input_data_bns = {
     "Stock Symbol": [stock_symbol],
-    "Strike Price": [strike],
+    "Strike Price": [bns_model_strike],
     "Time to Maturity (Years)": [time_to_maturity], 
     "Volatility (σ)": [volatility],
     "Risk-Free Interest Rate": [risk_free_rate],
@@ -643,7 +649,7 @@ st.table(input_df_bns)
 # Initialize BNS model
 bns_model = BNSModel(
     initial_stock_price=current_price,
-    strike_price=strike,
+    strike_price=bns_model_strike,
     time_to_maturity=time_to_maturity,
     risk_free_rate=risk_free_rate,
     volatility=volatility,
@@ -667,7 +673,7 @@ plt.title(f"BNS Model Simulation for {stock_symbol}")
 plt.xlabel("Time Steps")
 plt.ylabel("Stock Price")
 plt.grid(True)
-plt.axhline(y=strike, color='r', linestyle='--', label='Strike Price')
+plt.axhline(y=bns_model_strike, color='r', linestyle='--', label='Strike Price')
 plt.legend()
 
 # Display plot in Streamlit
@@ -680,7 +686,7 @@ st.title("Binomial Pricing Model")
 # Table of Inputs for Binomial Model
 input_data_binomial = {
     "Stock Symbol": [stock_symbol],
-    "Strike Price": [strike], 
+    "Strike Price": [binomial_strike], 
     "Time to Maturity (Years)": [time_to_maturity],
     "Volatility (σ)": [volatility],
     "Risk-Free Interest Rate": [risk_free_rate],
@@ -694,7 +700,7 @@ st.table(input_df_binomial)
 binomial_model = BinomialOptionPricingModel(
     stock_symbol=stock_symbol,
     time_to_maturity=time_to_maturity,
-    strike=strike,
+    strike=binomial_strike,
     risk_free_rate=risk_free_rate,
     volatility=volatility,
     num_simulations=number_of_simulations,
@@ -725,7 +731,7 @@ st.title("Monte Carlo Pricing Model")
 # Table of Inputs
 input_data_monte_carlo = {
     "Stock Symbol" : [stock_symbol], 
-    "Strike Price": [strike],
+    "Strike Price": [monte_carlo_strike],
     "Time to Maturity (Years)": [time_to_maturity],
     "Volatility (σ)": [volatility],
     "Risk-Free Interest Rate": [risk_free_rate],
@@ -736,7 +742,7 @@ input_data_monte_carlo = {
 input_df_monte_carlo = pd.DataFrame(input_data_monte_carlo)
 st.table(input_df_monte_carlo)
 
-mc_option = MonteCarloOptionPricingModel(stock_symbol, time_to_maturity, strike, risk_free_rate, volatility, number_of_simulations, number_of_steps)
+mc_option = MonteCarloOptionPricingModel(stock_symbol, time_to_maturity, monte_carlo_strike, risk_free_rate, volatility, number_of_simulations, number_of_steps)
 simulated_prices = mc_option.simulate_stock_price()
 plt = mc_option.plot_simulations(simulated_prices)
 st.pyplot(plt)
