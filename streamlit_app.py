@@ -1,4 +1,4 @@
-import streamlit as st
+siimport streamlit as st
 import pandas as pd
 import numpy as np
 from scipy.stats import norm
@@ -431,8 +431,6 @@ class BNSModel:
 with st.sidebar:
     st.title("📊 Options Pricing Model")
     st.write("`Created by:`")
-    linkedin_url = "www.linkedin.com/in/matthew-ng-315a07281"
-    st.markdown(f'<a href="{linkedin_url}" target="_blank" style="text-decoration: none; color: inherit;"><img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="25" height="25" style="vertical-align: middle; margin-right: 10px;">`Matthew Ng`</a>', unsafe_allow_html=True)
 
     st.markdown("### Stock Information")
     stock_symbol = st.text_input("Enter stock symbol (e.g, APPL, TSLA):", "AAPL")
